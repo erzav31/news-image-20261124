@@ -191,7 +191,7 @@ function wrapText(text: string, maxChars: number): string[] {
 }
 
 // ---------------------------------------------------------------------------
-// The day's news — 44 stories first reported Tuesday 24 November 2026.
+// The day's news — 48 stories first reported Tuesday 24 November 2026.
 // Region counts are computed from this array at render time, so the strip
 // can never disagree with the grid.
 // ---------------------------------------------------------------------------
@@ -243,6 +243,8 @@ const STORIES: { region: Region; headline: string }[] = [
   { region: 'ASIA', headline: 'THAI MARCHERS WALK 16 KM TO REFINERY' },
   { region: 'ASIA', headline: 'TOXIC ARSENIC FOUND IN N. THAILAND RIVERS' },
   { region: 'ASIA', headline: 'INDIA PLEDGES EUR 1.4BN FOR NEPAL' },
+  { region: 'ASIA', headline: 'INDONESIA HOLDS SHIP WITH 405T CHEMICALS' },
+  { region: 'ASIA', headline: 'TRAIN HITS MINIBUS IN N. SUMATRA, 3 HURT' },
   // AMERICAS (6)
   { region: 'AMERICAS', headline: "'EL CHAPO ISIDRO' TO FACE TRIAL IN MEXICO" },
   { region: 'AMERICAS', headline: 'TRUMP MAY DROP KIM NUCLEAR DEMAND' },
@@ -250,6 +252,7 @@ const STORIES: { region: Region; headline: string }[] = [
   { region: 'AMERICAS', headline: 'US PROBES NVIDIA CHIP SALES TO CHINA' },
   { region: 'AMERICAS', headline: 'US DEBT HITS WEAPONS WATCHDOG' },
   { region: 'AMERICAS', headline: 'PANAMA, FIRST QUANTUM RESUME MINE TALKS' },
+  { region: 'AMERICAS', headline: 'US SEEKS $1.1BN CRYPTO FORFEIT' },
   // AFRICA (3)
   { region: 'AFRICA', headline: 'BENGHAZI BLAST KILLS RUSSIAN CREW' },
   { region: 'AFRICA', headline: 'UN WARNS LIBYA MUST NOT BECOME WAR ARENA' },
@@ -257,6 +260,7 @@ const STORIES: { region: Region; headline: string }[] = [
   // OCEANIA (2)
   { region: 'OCEANIA', headline: 'HANSON FACES BIGGEST TEST IN STATE VOTE' },
   { region: 'OCEANIA', headline: 'AUSTRALIA: SHOPPERS HIT BY STORE COLLAPSE' },
+  { region: 'OCEANIA', headline: 'FIJI CLOSES SCHOOLS 5 DAYS IN DROUGHT' },
 ];
 
 const BIG_NUMBERS: { value: string; label: string }[] = [
@@ -264,17 +268,17 @@ const BIG_NUMBERS: { value: string; label: string }[] = [
   { value: '4,500 KM', label: 'MISSILE RANGE IRAN CLAIMS VS EU - #18' },
   { value: '23', label: 'ISRAELI SOLDIER SUICIDES IN 2026 - #22' },
   { value: '3', label: 'TANKERS HIT BY MINES IN HORMUZ - #19' },
-  { value: '16 KM', label: 'THAI MARCH TO BANGCHAK REFINERY - #31' },
-  { value: 'EUR 1.4BN', label: 'INDIA PLEDGES TO REBUILD NEPAL - #33' },
+  { value: '405 T', label: 'TONNES OF CHEMICALS ON HELD SHIP - #34' },
+  { value: '5 DAYS', label: 'DAYS FIJI SCHOOLS SHUT IN DROUGHT - #48' },
 ];
 
 const TIMELINE: { time: string; text: string }[] = [
   { time: '00:30', text: 'S. KOREA MINISTER QUITS' },
   { time: '00:32', text: "'EL CHAPO ISIDRO' TO FACE TRIAL" },
-  { time: '00:40', text: 'TRUMP BACKS NATO UKRAINE DEAL' },
-  { time: '01:00', text: 'CHINA OFFICIAL SENTENCED TO DEATH' },
   { time: '01:37', text: 'RUSSIAN STRIKE HITS KYIV' },
-  { time: '01:47', text: 'ARMENIA UNVEILS PEACE CONSTITUTION' },
+  { time: '01:59', text: 'US SEEKS $1.1BN CRYPTO FORFEIT' },
+  { time: '05:29', text: 'INDONESIA HOLDS SHIP WITH CHEMICALS' },
+  { time: '06:25', text: 'TRAIN HITS MINIBUS IN N. SUMATRA' },
 ];
 
 // Dotted world map: land runs [row, firstCol, lastCol] on a 64 x 28 grid.
@@ -305,7 +309,7 @@ const MAP_RUNS: [number, number, number][] = [
   [23, 20, 20],
 ];
 
-// Red-dot cities on the map (grid col, row): Kyiv, Gaza, Hormuz, Benghazi, Seoul, Bangkok.
+// Red-dot cities on the map (grid col, row): Kyiv, Gaza, Hormuz, Benghazi, Seoul, Bangkok, Jakarta, Suva.
 const MAP_MARKS: [number, number][] = [
   [37, 6],
   [38, 9],
@@ -313,6 +317,8 @@ const MAP_MARKS: [number, number][] = [
   [36, 9],
   [55, 8],
   [50, 12],
+  [51, 15],
+  [63, 17],
 ];
 
 // ---------------------------------------------------------------------------
@@ -374,11 +380,11 @@ function render(): void {
   fillRect(MX, 198, CW, 26, INK);
   drawText(strip, MX + 12, 204, 2, WHITE);
 
-  // ---- Story grid: 4 columns x 11 rows ------------------------------------
+  // ---- Story grid: 4 columns x 12 rows ------------------------------------
   const cols = 4;
   const gutter = 12;
   const colW = Math.floor((CW - gutter * (cols - 1)) / cols);
-  const rowH = 50;
+  const rowH = 48;
   const gridY = 230;
   const maxChars = Math.floor((colW - 4) / 11); // scale-2 char advance = 11px
   STORIES.forEach((s, idx) => {
@@ -393,11 +399,11 @@ function render(): void {
     const lines = wrapText(s.headline, maxChars);
     if (lines.length > 2) throw new Error(`headline wraps to ${lines.length} lines: ${s.headline}`);
     lines.forEach((ln, j) => drawText(ln, x, y + 16 + j * 15, 2, INK));
-    if (row < 10) fillRect(x, y + rowH - 3, colW, 1, RULE);
+    if (row < 11) fillRect(x, y + rowH - 3, colW, 1, RULE);
   });
 
   // ---- Bottom band: timeline (left) + dotted world map (right) -------------
-  const bandY = gridY + 11 * rowH + 8; // 788
+  const bandY = gridY + 12 * rowH + 8; // 814
   const midX = 512;
 
   // Timeline
@@ -417,17 +423,17 @@ function render(): void {
   const cellW = 7;
   const cellH = 5;
   for (const [r, c0, c1] of MAP_RUNS) {
-    for (let c = c0; c <= c1; c++) fillRect(mapX + c * cellW, mapY + r * cellH, 3, 3, MAPDOT);
+    for (let c = c0; c <= c1; c++) fillRect(mapX + c * cellW, mapY + r * cellH, 4, 4, MAPDOT);
   }
   for (const [c, r] of MAP_MARKS) {
     fillRect(mapX + c * cellW - 1, mapY + r * cellH - 1, 5, 5, RED);
   }
-  drawText('RED DOTS: KYIV, GAZA, HORMUZ,', mapX, mapY + 28 * cellH + 6, 2, INK);
-  drawText('BENGHAZI, SEOUL, BANGKOK', mapX, mapY + 28 * cellH + 22, 2, INK);
+  drawText('RED DOTS: KYIV, GAZA, HORMUZ, BENGHAZI,', mapX, mapY + 24 * cellH + 4, 2, INK);
+  drawText('SEOUL, BANGKOK, JAKARTA, SUVA', mapX, mapY + 24 * cellH + 20, 2, INK);
 
   // ---- Footer ---------------------------------------------------------------
   fillRect(MX, 1000, CW, 2, INK);
-  drawText('44 STORIES, FIRST REPORTED 24 NOV 2026 (UTC) - SOURCES: WIRE REPORTS', MX, 1006, 2, GREY);
+  drawText('48 STORIES, FIRST REPORTED 24 NOV 2026 (UTC) - SOURCES: WIRE REPORTS', MX, 1006, 2, GREY);
 }
 
 // ---------------------------------------------------------------------------
@@ -435,7 +441,7 @@ function render(): void {
 // ---------------------------------------------------------------------------
 
 // Sanity checks before drawing (fail loudly, never silently ship a bad poster).
-if (STORIES.length !== 44) throw new Error(`expected 44 stories, got ${STORIES.length}`);
+if (STORIES.length !== 48) throw new Error(`expected 48 stories, got ${STORIES.length}`);
 for (const [r, c0, c1] of MAP_RUNS) {
   if (r < 0 || r > 27 || c0 < 0 || c1 > 63 || c0 > c1) throw new Error(`bad map run: ${r},${c0},${c1}`);
 }
